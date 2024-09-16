@@ -2,30 +2,19 @@ import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt
 
 def window():
     app = QApplication(sys.argv)
     global win
     win = QMainWindow()
-
-    # Get screen dimensions
-    screen = app.primaryScreen()
-    screen_size = screen.size()
-    screen_width = screen_size.width()
-    screen_height = screen_size.height()
-
-    # Set window dimensions: width as 30% of screen width, and full screen height
-    window_width = int(screen_width * 0.3)
-    window_height = screen_height
-
-    # Set window to appear on the right side
-    x_position = screen_width - window_width
-    win.setGeometry(x_position, 0, window_width, window_height)
-
+    win.setGeometry(800, 300, 500, 500)
     win.setWindowTitle("Open Lab")
     win.setWindowIcon(QIcon("logo.png"))
     win.setToolTip("OpenLab")
+
+    # Window dimensions
+    window_width = win.width()
+    window_height = win.height()
 
     # Element dimensions
     input_width = 200
@@ -33,7 +22,7 @@ def window():
     button_width = 100
     button_height = 30
 
-    # Calculate positions to center the elements horizontally within the window
+    # Calculate positions to center the elements
     x_center = (window_width - input_width) // 2
     y_center = (window_height // 2) - 60
 
