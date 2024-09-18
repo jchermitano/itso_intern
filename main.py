@@ -1,37 +1,32 @@
 import sys
-import mysql.connector  # For MySQL database connection
+import requests  # For sending data to Google Sheets
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QMessageBox
 from PyQt5.QtGui import QIcon, QIntValidator  # Added QIntValidator for input restriction
 import re  # For regular expression to validate email
 import timer  # Importing timer module
 
-# Database connection details
-db_config = {
-    'host': 'localhost',
-    'user': 'root',  # Replace with your MySQL username
-    'password': 'admin',  # Replace with your MySQL password
-    'database': 'OpenLabDB'
-}
+# Google Apps Script Web App URL
+api_url = "https://script.google.com/a/macros/tip.edu.ph/s/AKfycbxUnPeQkUXBnLSNHm4SYi-OKtGVG30KHrK1Qp0J5VGmkbzpwbkd9rkjuGuoDMtPolgH/exec"  # Replace with your actual web app URL
 
 def insert_user(email, student_number):
-    """Function to insert email and student_number into MySQL database."""
+    """Function to insert email and student_number into Google Sheets via Google Apps Script."""
     try:
-        # Establish connection to MySQL database
-        connection = mysql.connector.connect(**db_config)
-        cursor = connection.cursor()
+        # Prepare the data to send
+        data = {
+            'email': email,
+            'student_number': student_number
+        }
 
-        # Insert the user data
-        sql_query = "INSERT INTO users (email, student_number) VALUES (%s, %s)"
-        cursor.execute(sql_query, (email, student_number))
+        # Send POST request to Google Apps Script Web App
+        response = requests.post(api_url, json=data)
 
-        # Commit the transaction
-        connection.commit()
-
-        cursor.close()
-        connection.close()
-        return True
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
+        if response.status_code == 200 and response.json().get("status") == "success":
+            return True
+        else:
+            print(f"Error: {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error: {e}")
         return False
 
 def on_submit():
@@ -48,16 +43,16 @@ def on_submit():
         QMessageBox.warning(win, "Student Number Error", "Please enter a valid Student Number.")
         return
 
-    # Insert the data into the database
+    # Insert the data into Google Sheets
     success = insert_user(email, student_number)
     
     if success:
-        print(f"Inserted into database: Email: {email}, Student Number: {student_number}")
+        print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}")
         # Proceed to start the timer
         global timer_window
         timer_window = timer.start_timer()
     else:
-        QMessageBox.critical(win, "Database Error", "Failed to insert data into the database.")
+        QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
 
 def window():
     app = QApplication(sys.argv)
