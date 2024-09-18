@@ -1,6 +1,6 @@
 import sys
-import ctypes  # For locking the workstation on Windows
-from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox
+import ctypes  
+from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QPushButton, QApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QTimer, Qt
 
@@ -8,24 +8,27 @@ class TimerWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # Window setup
-        self.setGeometry(800, 300, 400, 100)
+        self.setGeometry(800, 300, 400, 150)
         self.setWindowTitle("Open Lab Timer")
         self.setWindowIcon(QIcon("logo.png"))
         self.setToolTip("OpenLab")
         
-        # Always keep this window on top
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
 
-        self.time_remaining = 7200  # For testing, set to a short time
+        self.time_remaining = 7200  
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label)
-        self.timer.start(1000)  # Start the timer with a 1-second interval
+        self.timer.start(1000)  
 
         self.label = QLabel(self)
         self.label.setGeometry(50, 20, 300, 50)
         self.label.setText(self.format_time(self.time_remaining))
         self.label.setStyleSheet("font-size: 20px;")
+
+        # Add the logout button
+        self.logout_button = QPushButton("Logout", self)
+        self.logout_button.setGeometry(150, 80, 100, 30)
+        self.logout_button.clicked.connect(self.logout)
 
         self.notified_30_minutes = False
         self.msg_box = None
@@ -59,7 +62,16 @@ class TimerWindow(QMainWindow):
     def lock_pc(self):
         """Locks the PC (Windows) when the timer ends."""
         ctypes.windll.user32.LockWorkStation()
-        # Close the application after locking the PC
+        self.close()
+
+    def logout(self):
+        """Handles the logout action by recording the remaining time and closing the application."""
+        remaining_time = self.format_time(self.time_remaining)
+        # Save remaining time to a file (or any desired method)
+        with open("remaining_time.txt", "w") as file:
+            file.write(f"Remaining time at logout: {remaining_time}")
+
+        # Close the application
         self.close()
 
 def start_timer():
@@ -67,3 +79,5 @@ def start_timer():
     timer_window = TimerWindow()
     timer_window.show()
     return timer_window
+
+

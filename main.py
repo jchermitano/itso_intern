@@ -1,14 +1,13 @@
-
 import sys
 import requests
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLineEdit, QPushButton, QMessageBox
-from PyQt5.QtGui import QIcon, QIntValidator
+from PyQt5.QtGui import QIcon, QIntValidator, QPixmap, QPalette, QBrush
 from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import re
 import timer
+import requests
 
-# Google Apps Script Web App URL
 api_url = "https://script.google.com/macros/s/AKfycbwf7b9iX95GYqmeO5T0QfoXtBMrjyHbNuYITHpqLoG9OATzGEwEThZTKD9yYsING4c/exec"
 
 def insert_user(email, student_number):
@@ -32,20 +31,27 @@ def on_submit():
     email = name_input.text()
     student_number = student_number_input.text()
 
+    # Validate email format (must be a TIP email)
     if not re.match(r'^[\w\.-]+@tip\.edu\.ph$', email):
         QMessageBox.warning(win, "Email Error", "Please enter a valid TIP email.")
         return
 
+    # Validate student number (must be 7 digits)
     if len(student_number) != 7:
         QMessageBox.warning(win, "Student Number Error", "Please enter a valid Student Number.")
         return
 
+    # Attempt to insert the user data
     success = insert_user(email, student_number)
     
     if success:
         print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}")
+        # Clear the input fields after submission
+        name_input.clear()
+        student_number_input.clear()
+        
         global timer_window
-        timer_window = timer.start_timer()
+        timer_window = timer.start_timer()  # Open the timer window
     else:
         QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
 
@@ -59,6 +65,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Open Lab")
         self.setWindowIcon(QIcon("logo.png"))
         self.setToolTip("OpenLab")
+
+        self.set_background("TIP.png")  
 
         window_width = self.width()
         window_height = self.height()
@@ -98,14 +106,24 @@ class MainWindow(QMainWindow):
             }
         """)
         login_button.clicked.connect(on_submit)
+    
+    def set_background(self, image_path):
+        """Set background image of the window."""
+        background = QPixmap(image_path)
+
+        background = background.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio)
+
+        palette = self.palette()
+        palette.setBrush(QPalette.Window, QBrush(background))
+        self.setPalette(palette)
 
     def closeEvent(self, event):
         """Override the closeEvent to disable window closing."""
         reply = QMessageBox.question(self, 'Close Confirmation',
-                                     "Are you sure you want to exit the application?",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                     "This application is required and must fill up",
+                                     QMessageBox.Ok, QMessageBox.Ok)
 
-        if reply == QMessageBox.Yes:
+        if reply == QMessageBox.Ok:
             event.accept()
         else:
             event.ignore()
