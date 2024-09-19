@@ -6,12 +6,11 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import re
 import timer
-import requests
 
 api_url = "https://script.google.com/macros/s/AKfycbwf7b9iX95GYqmeO5T0QfoXtBMrjyHbNuYITHpqLoG9OATzGEwEThZTKD9yYsING4c/exec"
 
 def insert_user(email, student_number):
-    """Function to insert email and student_number into Google Sheets via Google Apps Script."""
+    """Function to insert email and student_number into Google Sheets via Google Apps Script.""" 
     try:
         data = {
             'email': email,
@@ -62,7 +61,7 @@ def on_submit():
         QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
 
 def show_main_window():
-    """Function to show the main window when the timer window is closed."""
+    """Function to show the main window when the timer window is closed.""" 
     win.show()
 
 class MainWindow(QMainWindow):
@@ -76,61 +75,73 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon("logo.png"))
         self.setToolTip("OpenLab")
 
-        self.set_background("b1.png")  
+        self.set_background("schoolbg.png")
 
         window_width = self.width()
         window_height = self.height()
-        input_width = 200
-        input_height = 30
-        button_width = 100
-        button_height = 30
+        input_width = 300
+        input_height = 40
+        button_width = 150
+        button_height = 40
         x_center = (window_width - input_width) // 2
-        y_center = (window_height // 2) - 60
+        y_center = (window_height // 2) - 30  # Lowered the sign-in part
 
         global name_input
         name_input = QLineEdit(self)
-        name_input.setPlaceholderText("Enter your Email")
+        name_input.setPlaceholderText("Enter your TIP Email")
         name_input.setGeometry(x_center, y_center, input_width, input_height)
-        name_input.setStyleSheet("border: 2px solid gray; border-radius: 10px; padding: 5px;")
+        name_input.setStyleSheet("""
+            border: 1px solid #C0C0C0;
+            border-radius: 15px;
+            padding: 5px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.7);
+        """)
 
         global student_number_input
         student_number_input = QLineEdit(self)
-        student_number_input.setPlaceholderText("Enter your Student Number")
-        student_number_input.setGeometry(x_center, y_center + 50, input_width, input_height)
-        student_number_input.setStyleSheet("border: 2px solid gray; border-radius: 10px; padding: 5px;")
+        student_number_input.setPlaceholderText("Enter your 7-Digit Student Number")
+        student_number_input.setGeometry(x_center, y_center + 60, input_width, input_height)
+        student_number_input.setStyleSheet("""
+            border: 1px solid #C0C0C0;
+            border-radius: 15px;
+            padding: 5px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.7);
+        """)
         
         int_validator = QIntValidator(0, 9999999)
         student_number_input.setValidator(int_validator)
 
         login_button = QPushButton("Start Session", self)
-        login_button.setGeometry((window_width - button_width) // 2, y_center + 100, button_width, button_height)
+        login_button.setGeometry((window_width - button_width) // 2, y_center + 130, button_width, button_height)
         login_button.setStyleSheet("""
             QPushButton {
-                border: 2px solid gray;
-                border-radius: 15px;
-                background-color: #A3C1DA;
-                padding: 5px;
+                border: 2px solid #333;
+                border-radius: 20px;
+                background-color: #333; /* Black color */
+                color: #FFF; /* White text color */
+                font-size: 16px;
+                padding: 10px;
             }
             QPushButton:hover {
-                background-color: #BCD2E8;
+                background-color: #444; /* Slightly lighter black on hover */
             }
         """)
         login_button.clicked.connect(on_submit)
     
     def set_background(self, image_path):
-        """Set background image of the window."""
+        """Set background image of the window.""" 
         background = QPixmap(image_path)
-
-        background = background.scaled(self.size(), QtCore.Qt.IgnoreAspectRatio)
-
+        background = background.scaled(self.size(), QtCore.Qt.KeepAspectRatioByExpanding, QtCore.Qt.SmoothTransformation)
         palette = self.palette()
         palette.setBrush(QPalette.Window, QBrush(background))
         self.setPalette(palette)
 
     def closeEvent(self, event):
-        """Override the closeEvent to disable window closing."""
+        """Override the closeEvent to disable window closing.""" 
         reply = QMessageBox.question(self, 'Close Confirmation',
-                                     "This application is required and must fill up",
+                                     "This application is required and must be filled out.",
                                      QMessageBox.Ok, QMessageBox.Ok)
 
         if reply == QMessageBox.Ok:
