@@ -51,7 +51,8 @@ def on_submit():
         student_number_input.clear()
         
         global timer_window
-        timer_window = timer.start_timer()  # Open the timer window
+        # Pass the email and student number to the timer window
+        timer_window = timer.start_timer(email, student_number)  
     else:
         QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
 
@@ -66,7 +67,7 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon("logo.png"))
         self.setToolTip("OpenLab")
 
-        self.set_background("TIP.png")  
+        self.set_background("b1.png")  
 
         window_width = self.width()
         window_height = self.height()
@@ -92,7 +93,7 @@ class MainWindow(QMainWindow):
         int_validator = QIntValidator(0, 9999999)
         student_number_input.setValidator(int_validator)
 
-        login_button = QPushButton("Submit", self)
+        login_button = QPushButton("Start Session", self)
         login_button.setGeometry((window_width - button_width) // 2, y_center + 100, button_width, button_height)
         login_button.setStyleSheet("""
             QPushButton {
