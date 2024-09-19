@@ -2,9 +2,11 @@ import sys
 import ctypes  
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QPushButton, QApplication, QDesktopWidget
 from PyQt5.QtGui import QIcon, QPixmap
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, pyqtSignal
 
 class TimerWindow(QMainWindow):
+    timer_closed = pyqtSignal()  # Define a signal to notify that TimerWindow is closing
+    
     def __init__(self, email, student_number):
         super().__init__()
 
@@ -12,7 +14,7 @@ class TimerWindow(QMainWindow):
         self.setWindowTitle("Open Lab Timer")
         self.setWindowIcon(QIcon("logo.png"))
         self.setToolTip("OpenLab")
-        
+
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
 
         self.move_to_lower_right()
@@ -48,8 +50,13 @@ class TimerWindow(QMainWindow):
         self.logout_button.setStyleSheet("background: none")
 
         self.notified_30_minutes = False
-        self.notified_2_minutes = False  # New flag for 2-minute notification
+        self.notified_2_minutes = False
         self.msg_box = None
+
+    def closeEvent(self, event):
+        """Override the closeEvent to emit a signal and allow main window to reopen."""
+        self.timer_closed.emit()  # Emit signal before closing
+        event.accept()  # Allow the window to close
 
     def set_background_image(self, image_path):
         """Sets a background image for the window."""

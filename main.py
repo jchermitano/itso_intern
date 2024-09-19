@@ -43,18 +43,27 @@ def on_submit():
 
     # Attempt to insert the user data
     success = insert_user(email, student_number)
-    
+
     if success:
         print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}")
         # Clear the input fields after submission
         name_input.clear()
         student_number_input.clear()
-        
+
+        # Hide the MainWindow
+        win.hide()
+
         global timer_window
-        # Pass the email and student number to the timer window
-        timer_window = timer.start_timer(email, student_number)  
+        # Pass the email and student number to the timer window and show it
+        timer_window = timer.start_timer(email, student_number)
+        # Connect the timer_closed signal to a function that will show the main window
+        timer_window.timer_closed.connect(show_main_window)
     else:
         QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
+
+def show_main_window():
+    """Function to show the main window when the timer window is closed."""
+    win.show()
 
 class MainWindow(QMainWindow):
     def __init__(self):
