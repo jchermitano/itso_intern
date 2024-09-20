@@ -146,6 +146,19 @@ class TimerWindow(QMainWindow):
             with open("remaining_time.txt", "w") as file:
                 file.write(f"Remaining time at logout: {remaining_time}")
 
+            # Create and show the message box for claiming the ID
+            msg_box = QMessageBox()
+            msg_box.setIcon(QMessageBox.Information)
+            msg_box.setWindowTitle("TIP Q.C. Claim ID")
+            msg_box.setText("Thank you for using OpenLab. Claim your ID at ITSO.")
+            msg_box.setStandardButtons(QMessageBox.Ok)
+
+            # Center the message box
+            screen_geometry = QDesktopWidget().availableGeometry().center()
+            msg_box.setGeometry(screen_geometry.x() - 150, screen_geometry.y() - 50, 300, 100)  # Adjust to center
+
+            msg_box.exec_()
+
             # Close the application
             self.close()
 

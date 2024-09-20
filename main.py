@@ -95,19 +95,19 @@ class MainWindow(QMainWindow):
             border-radius: 15px;
             padding: 5px;
             font-size: 14px;
-            background: rgba(255, 255, 255, 0.7);
+            background: #FFFFFF;  /* Solid white background */
         """)
 
         global student_number_input
         student_number_input = QLineEdit(self)
-        student_number_input.setPlaceholderText("Enter your 7-Digit Student Number")
+        student_number_input.setPlaceholderText("Enter your Student Number")
         student_number_input.setGeometry(x_center, y_center + 60, input_width, input_height)
         student_number_input.setStyleSheet("""
             border: 1px solid #C0C0C0;
             border-radius: 15px;
             padding: 5px;
             font-size: 14px;
-            background: rgba(255, 255, 255, 0.7);
+            background: #FFFFFF;  /* Solid white background */
         """)
         
         int_validator = QIntValidator(0, 9999999)
