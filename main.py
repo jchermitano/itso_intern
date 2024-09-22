@@ -6,15 +6,20 @@ from PyQt5.QtCore import Qt
 from PyQt5 import QtCore
 import re
 import timer
+from datetime import datetime
 
 api_url = "https://script.google.com/macros/s/AKfycbwf7b9iX95GYqmeO5T0QfoXtBMrjyHbNuYITHpqLoG9OATzGEwEThZTKD9yYsING4c/exec"
 
-def insert_user(email, student_number):
+def insert_user(email, student_number, logged_in):
     """Function to insert email and student_number into Google Sheets via Google Apps Script.""" 
+
+    logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     try:
         data = {
             'email': email,
-            'student_number': student_number
+            'student_number': student_number,
+            'logged_in': logged_in
         }
         response = requests.post(api_url, json=data)
         if response.status_code == 200 and response.json().get("status") == "success":
@@ -30,6 +35,9 @@ def on_submit():
     email = name_input.text()
     student_number = student_number_input.text()
 
+    # Assign the current timestamp directly to the 'logged_in' variable
+    logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     # Validate email format (must be a TIP email)
     if not re.match(r'^[\w\.-]+@tip\.edu\.ph$', email):
         QMessageBox.warning(win, "Email Error", "Please enter a valid TIP email.")
@@ -41,10 +49,10 @@ def on_submit():
         return
 
     # Attempt to insert the user data
-    success = insert_user(email, student_number)
+    success = insert_user(email, student_number, logged_in)
 
     if success:
-        print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}")
+        print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}, Logged In: {logged_in}")
         # Clear the input fields after submission
         name_input.clear()
         student_number_input.clear()

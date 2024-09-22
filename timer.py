@@ -3,12 +3,42 @@ import ctypes
 from PyQt5.QtWidgets import QMainWindow, QLabel, QMessageBox, QPushButton, QApplication, QDesktopWidget
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import QTimer, Qt, pyqtSignal
+import requests
+from datetime import datetime
+
+def send_logout_info(email, student_number, logged_in, remaining_time):
+    """Send remaining time and logout info to Google Sheets"""
+    # Since email and student_number are already strings, there's no need to use .text()
+    email = email.replace("Email: ", "").strip()  # Clean up the label text if necessary
+    student_number = student_number.replace("Student Number: ", "").strip()  # Same here
+    logged_in = logged_in.replace("Logged In: ", "").strip()
+
+    # Get the current time when logging out
+    logout_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    data = {
+        'email': email,
+        'student_number': student_number,
+        'logged_in': logged_in,
+        'remaining_time': remaining_time,
+        'logout': logout_time,
+    }
+    
+    response = requests.post("https://script.google.com/macros/s/AKfycbxQ3siisv7z0P9-rG4SYBx8v3983VU6TnTSfOhWAG7f1U43ZsroC7HgxvPwjJztTKNf/exec", json=data)
+    
+    if response.status_code == 200:
+        print("Logout info sent successfully")
+    else:
+        print(f"Failed to send logout info: {response.text}")
+
+from PyQt5.QtCore import pyqtSignal
 
 class TimerWindow(QMainWindow):
     timer_closed = pyqtSignal()  # Define a signal to notify that TimerWindow is closing
-    
+
     def __init__(self, email, student_number):
         super().__init__()
+        # Your other initialization code...
 
         self.resize(350, 150)
         self.setWindowTitle("Open Lab Timer")
@@ -22,7 +52,7 @@ class TimerWindow(QMainWindow):
         # Set the background image
         self.set_background_image("b2.png")
 
-        self.time_remaining = 123  # Total time (2 hours)
+        self.time_remaining = 7200  # Total time (2 hours)
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label)
         self.timer.start(1000)  # Timer updates every second
@@ -33,7 +63,7 @@ class TimerWindow(QMainWindow):
         self.label.setText(self.format_time(self.time_remaining))
         self.label.setStyleSheet("font-size: 20px; color: black; background: none; font-family: Arial; font-weight: bold;")
 
-        # Add the email and student number labels with improved style
+        # Add the email, student number, and login time labels with improved style
         self.email_label = QLabel(self)
         self.email_label.setGeometry(20, 10, 310, 20)
         self.email_label.setText(f"Email: {email}")
@@ -43,6 +73,13 @@ class TimerWindow(QMainWindow):
         self.student_number_label.setGeometry(20, 30, 310, 20)
         self.student_number_label.setText(f"Student Number: {student_number}")
         self.student_number_label.setStyleSheet("font-size: 12px; color: black; background: none; font-family: Arial;")
+
+        # Add the login time label
+        self.login_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Store login time
+        self.login_time_label = QLabel(self)
+        self.login_time_label.setGeometry(20, 50, 310, 20)
+        self.login_time_label.setText(f"Logged In: {self.login_time}")
+        self.login_time_label.setStyleSheet("font-size: 12px; color: black; background: none; font-family: Arial;")
 
         # Add the logout button with improved style
         self.logout_button = QPushButton("Logout", self)
@@ -142,7 +179,16 @@ class TimerWindow(QMainWindow):
                                      QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             remaining_time = self.format_time(self.time_remaining)
-            # Save remaining time to a file (or any desired method)
+
+            # Send logout info to Google Sheets
+            send_logout_info(
+                self.email_label.text(), 
+                self.student_number_label.text(), 
+                self.login_time_label.text(),  # Pass the login time here
+                remaining_time
+            )
+
+            # Save remaining time to a file (optional)
             with open("remaining_time.txt", "w") as file:
                 file.write(f"Remaining time at logout: {remaining_time}")
 
@@ -162,8 +208,9 @@ class TimerWindow(QMainWindow):
             # Close the application
             self.close()
 
+
 def start_timer(email, student_number):
-    """Creates the timer window and shows it.""" 
+    """Creates the timer window and shows it."""
     timer_window = TimerWindow(email, student_number)
     timer_window.show()
     return timer_window
