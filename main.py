@@ -7,11 +7,17 @@ from PyQt5 import QtCore
 import re
 import timer
 from datetime import datetime
+import os
+
+def resource_path(relative_path):
+    """ Get the absolute path to the resource, works for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 api_url = "https://script.google.com/macros/s/AKfycbwf7b9iX95GYqmeO5T0QfoXtBMrjyHbNuYITHpqLoG9OATzGEwEThZTKD9yYsING4c/exec"
 
 def insert_user(email, student_number, logged_in):
-    """Function to insert email and student_number into Google Sheets via Google Apps Script.""" 
+    """Function to insert email and student_number into Google Sheets via Google Apps Script."""
 
     logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -25,45 +31,35 @@ def insert_user(email, student_number, logged_in):
         if response.status_code == 200 and response.json().get("status") == "success":
             return True
         else:
-            print(f"Error: {response.text}")
             return False
     except Exception as e:
-        print(f"Error: {e}")
         return False
 
 def on_submit():
     email = name_input.text()
     student_number = student_number_input.text()
 
-    # Assign the current timestamp directly to the 'logged_in' variable
     logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Validate email format (must be a TIP email)
     if not re.match(r'^[\w\.-]+@tip\.edu\.ph$', email):
         QMessageBox.warning(win, "Email Error", "Please enter a valid TIP email.")
         return
 
-    # Validate student number (must be 7 digits)
     if len(student_number) != 7:
         QMessageBox.warning(win, "Student Number Error", "Please enter a valid Student Number.")
         return
 
-    # Attempt to insert the user data
     success = insert_user(email, student_number, logged_in)
 
     if success:
-        print(f"Inserted into Google Sheets: Email: {email}, Student Number: {student_number}, Logged In: {logged_in}")
-        # Clear the input fields after submission
+
         name_input.clear()
         student_number_input.clear()
 
-        # Hide the MainWindow
         win.hide()
 
         global timer_window
-        # Pass the email and student number to the timer window and show it
         timer_window = timer.start_timer(email, student_number)
-        # Connect the timer_closed signal to a function that will show the main window
         timer_window.timer_closed.connect(show_main_window)
     else:
         QMessageBox.critical(win, "Submission Error", "Failed to insert data into Google Sheets.")
@@ -92,7 +88,7 @@ class MainWindow(QMainWindow):
         button_width = 150
         button_height = 40
         x_center = (window_width - input_width) // 2
-        y_center = (window_height // 2) - 30  # Lowered the sign-in part
+        y_center = (window_height // 2) - 30  
 
         global name_input
         name_input = QLineEdit(self)
@@ -139,7 +135,8 @@ class MainWindow(QMainWindow):
         login_button.clicked.connect(on_submit)
     
     def set_background(self, image_path):
-        """Set background image of the window.""" 
+        """Set background image of the window."""
+        image_path = resource_path(image_path)  
         background = QPixmap(image_path)
         background = background.scaled(self.size(), QtCore.Qt.KeepAspectRatioByExpanding, QtCore.Qt.SmoothTransformation)
         palette = self.palette()
