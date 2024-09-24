@@ -14,12 +14,12 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-api_url = "https://script.google.com/macros/s/AKfycbwf7b9iX95GYqmeO5T0QfoXtBMrjyHbNuYITHpqLoG9OATzGEwEThZTKD9yYsING4c/exec"
+api_url = "https://script.google.com/macros/s/AKfycbxQ3siisv7z0P9-rG4SYBx8v3983VU6TnTSfOhWAG7f1U43ZsroC7HgxvPwjJztTKNf/exec"
 
 def insert_user(email, student_number, logged_in):
     """Function to insert email and student_number into Google Sheets via Google Apps Script."""
 
-    logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logged_in = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
 
     try:
         data = {
@@ -39,7 +39,7 @@ def on_submit():
     email = name_input.text()
     student_number = student_number_input.text()
 
-    logged_in = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logged_in = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
 
     if not re.match(r'^[\w\.-]+@tip\.edu\.ph$', email):
         QMessageBox.warning(win, "Email Error", "Please enter a valid TIP email.")

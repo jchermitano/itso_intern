@@ -19,7 +19,7 @@ def send_logout_info(email, student_number, logged_in, remaining_time):
     student_number = student_number.replace("Student Number: ", "").strip()  
     logged_in = logged_in.replace("Logged In: ", "").strip()
 
-    logout_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    logout_time = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
 
     data = {
         'email': email,
