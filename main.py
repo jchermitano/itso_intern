@@ -14,18 +14,20 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-api_url = "https://script.google.com/macros/s/AKfycbxQ3siisv7z0P9-rG4SYBx8v3983VU6TnTSfOhWAG7f1U43ZsroC7HgxvPwjJztTKNf/exec"
+api_url = "https://script.google.com/macros/s/AKfycbxAtguvxFKE6dtNzCNdKJ-Vb7M-mXjEKV8B3yX5L-y3fcdojyJt1g5qzldrvBzo-RNd/exec/exec"
 
-def insert_user(email, student_number, logged_in):
-    """Function to insert email and student_number into Google Sheets via Google Apps Script."""
+def insert_user(email, student_number, date, time):
 
-    logged_in = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
+    current_time = datetime.now()
+    date = current_time.strftime("%Y-%m-%d")  # Separate date
+    time = current_time.strftime("%I:%M:%S %p")  # Separate time in 12-hour format
 
     try:
         data = {
             'email': email,
             'student_number': student_number,
-            'logged_in': logged_in
+            'date': date,  
+            'time': time  
         }
         response = requests.post(api_url, json=data)
         if response.status_code == 200 and response.json().get("status") == "success":
@@ -39,8 +41,11 @@ def on_submit():
     email = name_input.text()
     student_number = student_number_input.text()
 
-    logged_in = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
+    current_time = datetime.now()
+    date = current_time.strftime("%Y-%m-%d")  # Separate date
+    time = current_time.strftime("%I:%M:%S %p")  # Separate time in 12-hour format
 
+    # Perform validation for email and student number
     if not re.match(r'^[\w\.-]+@tip\.edu\.ph$', email):
         QMessageBox.warning(win, "Email Error", "Please enter a valid TIP email.")
         return
@@ -49,13 +54,13 @@ def on_submit():
         QMessageBox.warning(win, "Student Number Error", "Please enter a valid Student Number.")
         return
 
-    success = insert_user(email, student_number, logged_in)
+    # Call insert_user with separate date and time
+    success = insert_user(email, student_number, date, time)
 
     if success:
-
+        # Clear input fields and hide the window
         name_input.clear()
         student_number_input.clear()
-
         win.hide()
 
         global timer_window

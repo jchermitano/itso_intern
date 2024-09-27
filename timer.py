@@ -13,23 +13,21 @@ def resource_path(relative_path):
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
 
-def send_logout_info(email, student_number, logged_in, remaining_time):
-    """Send remaining time and logout info to Google Sheets"""
-    email = email.replace("Email: ", "").strip() 
-    student_number = student_number.replace("Student Number: ", "").strip()  
-    logged_in = logged_in.replace("Logged In: ", "").strip()
+def send_logout_info(email, student_number, date, time, remaining_time):
+
 
     logout_time = datetime.now().strftime("%Y-%m-%d %I:%M:%S %p") 
 
     data = {
         'email': email,
         'student_number': student_number,
-        'logged_in': logged_in,
+        'date': date,
+        'time': time,
         'remaining_time': remaining_time,
         'logout': logout_time,
     }
     
-    requests.post("https://script.google.com/macros/s/AKfycbxQ3siisv7z0P9-rG4SYBx8v3983VU6TnTSfOhWAG7f1U43ZsroC7HgxvPwjJztTKNf/exec", json=data)
+    requests.post("https://script.google.com/macros/s/AKfycbxAtguvxFKE6dtNzCNdKJ-Vb7M-mXjEKV8B3yX5L-y3fcdojyJt1g5qzldrvBzo-RNd/exec", json=data)
 
 from PyQt5.QtCore import pyqtSignal
 
@@ -163,18 +161,20 @@ class TimerWindow(QMainWindow):
         self.close()
 
     def logout(self):
-        """Handles the logout action by recording the remaining time and closing the application with a confirmation dialog.""" 
+
         reply = QMessageBox.question(self, 'Logout Confirmation',
-                                     "Are you sure you want to log out? Your remaining time will be saved.",
-                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+                                 "Are you sure you want to log out? Your remaining time will be saved.",
+                                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             remaining_time = self.format_time(self.time_remaining)
 
+            # Ensure all parameters are passed correctly
             send_logout_info(
-                self.email_label.text(), 
-                self.student_number_label.text(), 
-                self.login_time_label.text(),  
-                remaining_time
+                self.email_label.text(),  # Email
+                self.student_number_label.text(),  # Student number
+                self.login_time_label.text(),  # Date/Time of login
+                datetime.now().strftime("%I:%M %p"),  # Time at logout
+                remaining_time  # Remaining time
             )
 
             msg_box = QMessageBox()
@@ -189,7 +189,6 @@ class TimerWindow(QMainWindow):
             msg_box.exec_()
 
             self.close()
-
 
 def start_timer(email, student_number):
     """Creates the timer window and shows it."""
