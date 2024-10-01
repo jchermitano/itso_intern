@@ -14,6 +14,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 def send_logout_info(email, student_number, date, time, remaining_time):
+
     headers = {'Content-Type': 'application/json'}
     data = {
         'email': email,
@@ -21,9 +22,9 @@ def send_logout_info(email, student_number, date, time, remaining_time):
         'date': date,
         'time': time,
         'remaining_time': remaining_time,
-        'logout': True  # This flag indicates that it is a logout
     }
-    requests.post("https://script.google.com/macros/s/AKfycbxTvN_1fd5a7uzsKpD0wOxvK3JBGrq35c-LLJE0Wvwo3gfGjEjhN5akBg5AkbC7bLSU/exec", json=data, headers=headers)
+
+    requests.post("https://script.google.com/macros/s/AKfycbxEd-E6TDmlr5mjXEVmxRyB7DZ6OSAy6w1boySi5UvwvQx_HgrSLMOP-VMINluOaS4O/exec", json=data, headers=headers)  # Ensure headers are passed
 
 from PyQt5.QtCore import pyqtSignal
 
@@ -44,7 +45,7 @@ class TimerWindow(QMainWindow):
 
         self.set_background_image("b2.png")
 
-        self.time_remaining = 5
+        self.time_remaining = 5  
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_label)
         self.timer.start(1000)  
@@ -165,7 +166,7 @@ class TimerWindow(QMainWindow):
             email,  # Email (without the "Email:" prefix)
             student_number,  # Student number (without the "Student Number:" prefix)
             datetime.now().strftime("%Y-%m-%d"),  # Date
-            datetime.now().strftime("%I:%M:%S %p"),  # Time at lock (logout)
+            datetime.now().strftime("%I:%M %p"),  # Time at lock (logout)
             remaining_time  # Remaining time
         )
 
@@ -191,7 +192,7 @@ class TimerWindow(QMainWindow):
                 email,  # Email (without the "Email:" prefix)
                 student_number,  # Student number (without the "Student Number:" prefix)
                 datetime.now().strftime("%Y-%m-%d"),  # Date/Time of login (without the "Logged In:" prefix)
-                datetime.now().strftime("%I:%M:%S %p"),  # Time at logout
+                datetime.now().strftime("%I:%M %p"),  # Time at logout
                 remaining_time  # Remaining time
             )
 
